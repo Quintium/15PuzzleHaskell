@@ -1,3 +1,5 @@
+module ArrayList where
+
 import Data.List
 import Data.Maybe
 import Data.Array
@@ -7,42 +9,42 @@ import Control.Monad.ST
 import Debug.Trace
 
 data ArrayList s e = ArrayList Int (STArray s Int e)
-type ArrayListM s e = STRef s (ArrayList s e)
+newtype ArrayListM s e = ArrayListM (STRef s (ArrayList s e))
 
-minALBound :: Int
-minALBound = 4
+minALCapacity :: Int
+minALCapacity = 4
 
-alBound :: ArrayListM s e -> ST s Int
-alBound ref = do
+alCapacity :: ArrayListM s e -> ST s Int
+alCapacity (ArrayListM ref) = do
     (ArrayList n arr) <- readSTRef ref
     bounds <- getBounds arr
     return $ rangeSize bounds
 
 alLength :: ArrayListM s e -> ST s Int
-alLength ref = do
+alLength (ArrayListM ref) = do
     (ArrayList n arr) <- readSTRef ref
     return n
 
 alToArray :: ArrayListM s e -> ST s (Array Int e)
-alToArray ref = do
+alToArray (ArrayListM ref) = do
     (ArrayList n arr) <- readSTRef ref
     es <- getElems arr
     return $ listArray (0,n-1) es
 
 alToList :: ArrayListM s e -> ST s [e]
-alToList ref = elems <$> alToArray ref
+alToList al = elems <$> alToArray al
 
 newAL :: ST s (ArrayListM s e)
 newAL = do
-    arr <- newArray_ (0, minALBound-1) 
-    let al = ArrayList 0 arr
-    newSTRef al
+    arr <- newArray_ (0, minALCapacity-1) 
+    ref <- newSTRef $ ArrayList 0 arr
+    return $ ArrayListM ref
 
 push :: ArrayListM s e -> e -> ST s ()
-push ref x = do
+push al@(ArrayListM ref) x = do
     (ArrayList n arr) <- readSTRef ref
-    bound <- alBound ref
-    if n == bound then
+    capacity <- alCapacity al
+    if n == capacity then
         (do
             es <- getElems arr
             arr' <- newListArray (0,2*n-1) (es ++ [x])
@@ -55,11 +57,11 @@ push ref x = do
         )
 
 pop :: ArrayListM s e -> ST s ()
-pop ref = do
+pop al@(ArrayListM ref) = do
     (ArrayList n arr) <- readSTRef ref
 
-    bound <- alBound ref
-    if 4*(n-1) == bound && n-1 >= minALBound then
+    capacity <- alCapacity al
+    if 4*(n-1) == capacity && n-1 >= minALCapacity then
         (do
             es <- getElems arr
             arr' <- newListArray (0, 2*(n-1)-1) $ init es
@@ -69,12 +71,12 @@ pop ref = do
         writeSTRef ref $ ArrayList (n-1) arr
 
 readAt :: ArrayListM s e -> Int -> ST s e
-readAt ref i = do
+readAt (ArrayListM ref) i = do
     (ArrayList n arr) <- readSTRef ref
     readArray arr i
 
 writeAt :: ArrayListM s e -> Int -> e -> ST s ()
-writeAt ref i x = do
+writeAt (ArrayListM ref) i x = do
     (ArrayList n arr) <- readSTRef ref
     writeArray arr i x
 

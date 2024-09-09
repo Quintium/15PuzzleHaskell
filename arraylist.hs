@@ -6,6 +6,7 @@ import Data.Array
 import Data.Array.ST
 import Data.STRef
 import Control.Monad.ST
+import Control.Monad
 import Debug.Trace
 
 data ArrayList s e = ArrayList Int (STArray s Int e)
@@ -34,14 +35,14 @@ alToArray (ArrayListM ref) = do
 alToList :: ArrayListM s e -> ST s [e]
 alToList al = elems <$> alToArray al
 
-newAL :: ST s (ArrayListM s e)
-newAL = do
+emptyAL :: ST s (ArrayListM s e)
+emptyAL = do
     arr <- newArray_ (0, minALCapacity-1) 
     ref <- newSTRef $ ArrayList 0 arr
     return $ ArrayListM ref
 
-push :: ArrayListM s e -> e -> ST s ()
-push al@(ArrayListM ref) x = do
+pushAL :: ArrayListM s e -> e -> ST s ()
+pushAL al@(ArrayListM ref) x = do
     (ArrayList n arr) <- readSTRef ref
     capacity <- alCapacity al
     if n == capacity then
@@ -56,38 +57,39 @@ push al@(ArrayListM ref) x = do
             writeSTRef ref $ ArrayList (n+1) arr
         )
 
-pop :: ArrayListM s e -> ST s ()
-pop al@(ArrayListM ref) = do
+popAL :: ArrayListM s e -> ST s ()
+popAL al@(ArrayListM ref) = do
     (ArrayList n arr) <- readSTRef ref
 
-    capacity <- alCapacity al
-    if 4*(n-1) == capacity && n-1 >= minALCapacity then
-        (do
-            es <- getElems arr
-            arr' <- newListArray (0, 2*(n-1)-1) $ init es
-            writeSTRef ref $ ArrayList (n-1) arr'
-        )
-    else
-        writeSTRef ref $ ArrayList (n-1) arr
+    when (n /= 0) $ do
+        capacity <- alCapacity al
+        if 4*(n-1) == capacity && n-1 >= minALCapacity then
+            (do
+                es <- getElems arr
+                arr' <- newListArray (0, 2*(n-1)-1) $ init es
+                writeSTRef ref $ ArrayList (n-1) arr'
+            )
+        else
+            writeSTRef ref $ ArrayList (n-1) arr
 
-readAt :: ArrayListM s e -> Int -> ST s e
-readAt (ArrayListM ref) i = do
+readAL :: ArrayListM s e -> Int -> ST s e
+readAL (ArrayListM ref) i = do
     (ArrayList n arr) <- readSTRef ref
     readArray arr i
 
-writeAt :: ArrayListM s e -> Int -> e -> ST s ()
-writeAt (ArrayListM ref) i x = do
+writeAL :: ArrayListM s e -> Int -> e -> ST s ()
+writeAL (ArrayListM ref) i x = do
     (ArrayList n arr) <- readSTRef ref
     writeArray arr i x
 
 test = do
-    al <- newAL
-    push al 1
-    push al 2
-    push al 3
-    push al 4
-    pop al
-    push al 5
-    pop al
-    push al 6
+    al <- emptyAL
+    pushAL al 1
+    pushAL al 2
+    pushAL al 3
+    pushAL al 4
+    popAL al
+    pushAL al 5
+    popAL al
+    pushAL al 6
     alToList al

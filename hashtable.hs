@@ -97,18 +97,8 @@ instance Hashable Int where
     hash k = (4231 * k + 4723) `mod` 295495199
 
 test = do
-    ht ::  HashTableM s Int String <- emptyHT
-    putHT ht 1 "hello"
-    putHT ht 2 "this"
-    putHT ht 3 "is"
-    putHT ht 4 "actually"
-    putHT ht 5 "cool"
-    putHT ht 6 "hello"
-    putHT ht 7 "this"
-    putHT ht 8 "is"
-    putHT ht 8 "yoo"
-    deleteHT ht 9
-    deleteHT ht 8
+    ht :: HashTableM s Int Int <- emptyHT
 
-    htAssocs ht
-
+    forM_ [1..100000] $ \n -> putHT ht n $ n*n
+    
+    getHT ht 38229

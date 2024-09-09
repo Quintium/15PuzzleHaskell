@@ -45,10 +45,10 @@ putHT :: HashTableM s k v -> k -> v -> ST s ()
 putHT ht@(HashTableM ref) x y = do
     (HashTable n arr) <- readSTRef ref
     capacity <- htCapacity ht
-    when (n >= 2 * capacity) $ do
-        arr' <- newArray (0, 2*capacity-1) []
-        writeSTRef ref $ HashTable n arr'
+    when (n == 2*capacity) $ do
         allAssocs <- htAssocs ht
+        arr' <- newArray (0, n-1) []
+        writeSTRef ref $ HashTable 0 arr'
         forM_ allAssocs $ uncurry $ forcePutHT ht
     forcePutHT ht x y
 
@@ -60,6 +60,28 @@ forcePutHT ht@(HashTableM ref) x y = do
     hAssoc <- readArray arr h
     let (f, f') = partition ((== x) . fst) hAssoc
     writeArray arr h ((x, y):f')
+    writeSTRef ref $ HashTable (n + 1 - length f) arr
+
+deleteHT :: HashTableM s k v -> k -> ST s ()
+deleteHT ht@(HashTableM ref) x = do
+    forceDeleteHT ht x
+    (HashTable n arr) <- readSTRef ref
+    capacity <- htCapacity ht
+    when (2*n <= capacity && n >= minHTCapacity) $ do
+        allAssocs <- htAssocs ht
+        arr' <- newArray (0, n-1) []
+        writeSTRef ref $ HashTable n arr'
+        forM_ allAssocs $ uncurry $ forcePutHT ht
+
+forceDeleteHT :: HashTableM s k v -> k -> ST s ()
+forceDeleteHT ht@(HashTableM ref) x = do
+    (HashTable n arr) <- readSTRef ref
+    capacity <- htCapacity ht
+    let h = hash x `mod` capacity
+    hAssoc <- readArray arr h
+    let (f, f') = partition ((== x) . fst) hAssoc
+    writeArray arr h f'
+    writeSTRef ref $ HashTable (n - length f) arr
 
 getHT :: HashTableM s k v -> k -> ST s (Maybe v)
 getHT ht@(HashTableM ref) x = do
@@ -81,5 +103,12 @@ test = do
     putHT ht 3 "is"
     putHT ht 4 "actually"
     putHT ht 5 "cool"
-    putHT ht (-1) "not"
-    getHT ht (-1)
+    putHT ht 6 "hello"
+    putHT ht 7 "this"
+    putHT ht 8 "is"
+    putHT ht 8 "yoo"
+    deleteHT ht 9
+    deleteHT ht 8
+
+    htAssocs ht
+

@@ -44,16 +44,25 @@ aStar start end edges heuristic = runST $ do
                         let (dist, path) = fromJust entry
                         forM_ (edges min) $ \(vertice, len, edge) -> do
                             let newDist = dist + len
-                            decreaseWeight pq vertice (newDist + heuristic vertice)
-                            putHT ht vertice (newDist, edge : path)
+                            statsMaybe <- getHT ht vertice
+                            let better = maybe True (\(currDist, _) -> newDist < currDist) statsMaybe
+                            when better $ do
+                                decreaseWeight pq vertice (newDist + heuristic vertice)
+                                putHT ht vertice (newDist, edge : path)
+                            
                         return $ Just False
                 Nothing -> return Nothing
 
-edge :: Int -> [(Int, Int, String)]
-edge n = [(n-1, 1, "-"), (n+1, 1, "+")]
+edge1 :: Int -> [(Int, Int, String)]
+edge1 n = [(n-1, 1, "Minus1"), (n+1, 1, "Plus1")]
 
-dist x y = abs (x - y)
+dist1 x y = abs (x - y)
 
-testA n = aStar 0 n edge (dist n)
+testA n = aStar 0 n edge1 (dist1 n)
+
+edge2 :: Int -> [(Int, Int, String)]
+edge2 n = [(n-1, 1, "Minus1"), (n*2, 1, "Double"), (n*3, 1, "Triple"), (n*n, 1, "Square")]
+
+testB n = aStar 1 n edge2 (\k -> max (k - n) 0)
 
             

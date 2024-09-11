@@ -24,8 +24,12 @@ coordsToInd (x, y) = 4 * y + x
 indToCoords :: Int -> (Int, Int)
 indToCoords n = (n `mod` 4, n `div` 4)
 
+fromList :: [Int] -> Puzzle
+fromList ns = Puzzle hole $ listArray (0,15) ns
+    where hole = indToCoords $ fromJust $ elemIndex 0 ns
+
 solvedPuzzle :: Puzzle
-solvedPuzzle = Puzzle (3, 3) $ listArray (0,15) $ [1..15] ++ [0]
+solvedPuzzle = fromList ([1..15] ++ [0])
 
 getMoves :: Puzzle -> [(Puzzle, Int, Move)]
 getMoves puzzle = mapMaybe (getMove puzzle) [LeftM, RightM, UpM, DownM]
@@ -43,24 +47,17 @@ switchTiles tiles c1 c2 = tiles // [(i1, n2), (i2, n1)]
           n1 = tiles ! i1
           n2 = tiles ! i2
 
-writeTile :: Array Int (Array Int Int) -> (Int, Int) -> Int -> Array Int (Array Int Int)
-writeTile tiles (x, y) n = tiles // [(x, (tiles ! x) // [(y, n)])]
-
-tileDistance :: Puzzle -> (Int, Int) -> Int
-tileDistance (Puzzle _ tiles) (x, y) = if n == 0 then 0 else abs (x - solvedX) + abs(y - solvedY)
+tileDistance :: Int -> Int -> Int
+tileDistance i n = if n == 0 then 0 else abs (x - solvedX) + abs(y - solvedY)
     where (solvedX, solvedY) = indToCoords (n-1)
-          n = tiles ! coordsToInd (x, y)
+          (x, y) = indToCoords i
 
 heuristic :: Puzzle -> Int
-heuristic puzzle = sum [tileDistance puzzle (x, y) | x <- [0..3], y <- [0..3]]
+heuristic (Puzzle _ tiles) = sum $ map (uncurry tileDistance) $ assocs tiles
 
 instance Hashable Puzzle where
     hash :: Puzzle -> Int
-    hash (Puzzle _ tiles) = sum $ map (\i -> (tiles ! i) * (16 ^ i)) [0..15]
-
-fromList :: [Int] -> Puzzle
-fromList ns = Puzzle hole $ listArray (0,15) ns
-    where hole = indToCoords $ fromJust $ elemIndex 0 ns
+    hash (Puzzle _ tiles) = sum $ map (\(i, n) -> n * (16 ^ i)) $ assocs tiles
 
 solve :: Puzzle -> Maybe (Int, [Move])
 solve puzzle = aStar puzzle solvedPuzzle getMoves heuristic

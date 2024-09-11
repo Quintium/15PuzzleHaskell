@@ -23,14 +23,14 @@ aStar start goal edges heuristic = runST $ do
     hm :: HashMapM s a Bool <- emptyHM
     nodes <- newSTRef 0
 
-    insert pq (start, 0, []) (heuristic start)
+    insertPQ pq (start, 0, []) (heuristic start)
 
     res <- repeatUntilSuccess (step pq hm nodes)
     n <- readSTRef nodes
     return $ trace ("Nodes: " ++ show n) res
 
     where step pq hm nodes = do
-            minMaybe <- extractMin pq
+            minMaybe <- extractMinPQ pq
 
             case minMaybe of
                 Just (minNode, dist, path) -> do
@@ -44,7 +44,7 @@ aStar start goal edges heuristic = runST $ do
                             else do
                                 forM_ (edges minNode) $ \(neighbor, len, edge) -> do
                                     let newDist = dist + len
-                                    insert pq (neighbor, newDist, edge : path) (newDist + heuristic neighbor)
+                                    insertPQ pq (neighbor, newDist, edge : path) (newDist + heuristic neighbor)
                                     modifySTRef nodes (+1)
                             
                                 return $ Just Nothing

@@ -6,12 +6,12 @@ import Data.Maybe
 import Data.List
 import Debug.Trace
 
-data Puzzle = Puzzle (Int, Int) (Array Int Int) deriving Eq
+data Puzzle = Puzzle (Int, Int) (Array Int Int) Int Int deriving Eq
 data Move = LeftM | RightM | UpM | DownM deriving Show
 
 instance Show Puzzle where
     show :: Puzzle -> String
-    show (Puzzle _ tiles) = show $ elems tiles
+    show (Puzzle _ tiles _ _) = show $ elems tiles
 
 -- how the hole moves during moves
 moveCoords :: Move -> (Int, Int)
@@ -30,8 +30,9 @@ indToCoords :: Int -> (Int, Int)
 indToCoords n = (n `mod` 4, n `div` 4)
 
 fromList :: [Int] -> Puzzle
-fromList ns = Puzzle hole $ listArray (0,15) ns
-    where hole = indToCoords $ fromJust $ elemIndex 0 ns
+fromList ns = Puzzle hole tiles (manualHash tiles) (manualHeuristic tiles)
+    where tiles = listArray (0,15) ns
+          hole = indToCoords $ fromJust $ elemIndex 0 ns
 
 solvedPuzzle :: Puzzle
 solvedPuzzle = fromList ([1..15] ++ [0])
@@ -40,8 +41,13 @@ getMoves :: Puzzle -> [(Puzzle, Int, Move)]
 getMoves puzzle = mapMaybe (getMove puzzle) [LeftM, RightM, UpM, DownM]
 
 getMove :: Puzzle -> Move -> Maybe (Puzzle, Int, Move)
-getMove (Puzzle hole@(hx, hy) tiles) move = if inBounds newHole then Just (newPuzzle, 1, move) else Nothing
-    where newPuzzle = Puzzle newHole $ switchTiles tiles hole newHole
+getMove (Puzzle hole@(hx, hy) tiles hash heur) move = if inBounds newHole then Just (newPuzzle, 1, move) else Nothing
+    where newPuzzle = Puzzle newHole (switchTiles tiles hole newHole) newHash newHeur
+          newHash = hash + movedTile * (16 ^ holeInd - 16 ^ newHoleInd)
+          newHeur = heur + tileDistance holeInd movedTile - tileDistance newHoleInd movedTile
+          movedTile = tiles ! newHoleInd
+          holeInd = coordsToInd hole
+          newHoleInd = coordsToInd newHole
           newHole = (hx + dx, hy + dy)
           (dx, dy) = moveCoords move
 
@@ -57,12 +63,18 @@ tileDistance i n = if n == 0 then 0 else abs (x - solvedX) + abs(y - solvedY)
     where (solvedX, solvedY) = indToCoords (n-1)
           (x, y) = indToCoords i
 
-heuristic :: Puzzle -> Int
-heuristic (Puzzle _ tiles) = sum $ map (uncurry tileDistance) $ assocs tiles
+manualHash :: Array Int Int -> Int
+manualHash tiles = sum $ map (\(i, n) -> n * (16 ^ i)) $ assocs tiles
+
+manualHeuristic :: Array Int Int -> Int
+manualHeuristic tiles = sum $ map (uncurry tileDistance) $ assocs tiles
 
 instance Hashable Puzzle where
     hash :: Puzzle -> Int
-    hash (Puzzle _ tiles) = sum $ map (\(i, n) -> n * (16 ^ i)) $ assocs tiles
+    hash (Puzzle _ _ h _) = h
+
+heuristic :: Puzzle -> Int
+heuristic (Puzzle _ _ _ h) = h
 
 solve :: Puzzle -> Maybe (Int, String)
 solve puzzle = (\(p, n, ms) -> (n, map moveChar ms)) <$> aStar puzzle (== solvedPuzzle) getMoves heuristic

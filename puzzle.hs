@@ -4,6 +4,7 @@ import HashTable
 import Data.Array
 import Data.Maybe
 import Data.List
+import Debug.Trace
 
 data Puzzle = Puzzle (Int, Int) (Array Int Int) deriving Eq
 data Move = LeftM | RightM | UpM | DownM deriving Show
@@ -59,6 +60,14 @@ tileDistance i n = if n == 0 then 0 else abs (x - solvedX) + abs(y - solvedY)
 heuristic :: Puzzle -> Int
 heuristic (Puzzle _ tiles) = sum $ map (uncurry tileDistance) $ assocs tiles
 
+inversionsH :: Puzzle -> Float
+inversionsH puzzle = (sum [if inversion puzzle i j then 1 else 0 | i <- [0..15], j <- [i+1..15]]) / 3
+
+inversion :: Puzzle -> Int -> Int -> Bool
+inversion _ 0 _ = False
+inversion _ _ 0 = False
+inversion (Puzzle _ tiles) i j = tiles ! i > tiles ! j
+
 instance Hashable Puzzle where
     hash :: Puzzle -> Int
     hash (Puzzle _ tiles) = sum $ map (\(i, n) -> n * (16 ^ i)) $ assocs tiles
@@ -76,10 +85,16 @@ solveOnePart :: Maybe (Puzzle, [Move]) -> Int -> Maybe (Puzzle, [Move])
 solveOnePart accumMaybe goal = do
     (p, ms) <- accumMaybe
     (p', _, ms') <- partSolve goal p
-    return (p', ms ++ ms')
+    return $ trace (show goal) (p', ms ++ ms')
 
-solveSuboptimal :: Puzzle -> Maybe (Int, [Move])
-solveSuboptimal puzzle = (\(p, n, ms) -> (n, ms)) <$> solveInParts [10,5,0] puzzle
+solveSuboptimal :: Puzzle -> Maybe (Int, String)
+solveSuboptimal puzzle = (\(p, n, ms) -> (n, map moveChar ms)) <$> solveInParts [20,10,7,5,3,0] puzzle
+
+moveChar :: Move -> Char
+moveChar LeftM = 'L'
+moveChar RightM = 'R'
+moveChar UpM = 'U'
+moveChar DownM = 'D'
 
 main :: IO ()
 main = do

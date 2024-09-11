@@ -36,10 +36,10 @@ fromList ns = Puzzle hole $ listArray (0,15) ns
 solvedPuzzle :: Puzzle
 solvedPuzzle = fromList ([1..15] ++ [0])
 
-getMoves :: Puzzle -> [(Puzzle, Float, Move)]
+getMoves :: Puzzle -> [(Puzzle, Int, Move)]
 getMoves puzzle = mapMaybe (getMove puzzle) [LeftM, RightM, UpM, DownM]
 
-getMove :: Puzzle -> Move -> Maybe (Puzzle, Float, Move)
+getMove :: Puzzle -> Move -> Maybe (Puzzle, Int, Move)
 getMove (Puzzle hole@(hx, hy) tiles) move = if inBounds newHole then Just (newPuzzle, 1, move) else Nothing
     where newPuzzle = Puzzle newHole $ switchTiles tiles hole newHole
           newHole = (hx + dx, hy + dy)
@@ -60,28 +60,20 @@ tileDistance i n = if n == 0 then 0 else abs (x - solvedX) + abs(y - solvedY)
 heuristic :: Puzzle -> Int
 heuristic (Puzzle _ tiles) = sum $ map (uncurry tileDistance) $ assocs tiles
 
-inversionsH :: Puzzle -> Float
-inversionsH puzzle = (sum [if inversion puzzle i j then 1 else 0 | i <- [0..15], j <- [i+1..15]]) / 3
-
-inversion :: Puzzle -> Int -> Int -> Bool
-inversion _ 0 _ = False
-inversion _ _ 0 = False
-inversion (Puzzle _ tiles) i j = tiles ! i > tiles ! j
-
 instance Hashable Puzzle where
     hash :: Puzzle -> Int
     hash (Puzzle _ tiles) = sum $ map (\(i, n) -> n * (16 ^ i)) $ assocs tiles
 
-solve :: Puzzle -> Maybe (Float, [Move])
-solve puzzle = (\(p, n, ms) -> (n, ms)) <$> aStar puzzle (== solvedPuzzle) getMoves inversionsH
+solve :: Puzzle -> Maybe (Int, [Move])
+solve puzzle = (\(p, n, ms) -> (n, ms)) <$> aStar puzzle (== solvedPuzzle) getMoves heuristic
 
-partSolve :: Float -> Puzzle -> Maybe (Puzzle, Float, [Move])
-partSolve n puzzle = aStar puzzle (\p -> inversionsH p <= n) getMoves (\p -> max (inversionsH p - n) 0)
+partSolve :: Int -> Puzzle -> Maybe (Puzzle, Int, [Move])
+partSolve n puzzle = aStar puzzle (\p -> heuristic p <= n) getMoves (\p -> max (heuristic p - n) 0)
 
-solveInParts :: [Float] -> Puzzle -> Maybe (Puzzle, Int, [Move])
+solveInParts :: [Int] -> Puzzle -> Maybe (Puzzle, Int, [Move])
 solveInParts steps puzzle = (\(p, ms) -> (p, length ms, ms)) <$> foldl solveOnePart (Just (puzzle, [])) steps
 
-solveOnePart :: Maybe (Puzzle, [Move]) -> Float -> Maybe (Puzzle, [Move])
+solveOnePart :: Maybe (Puzzle, [Move]) -> Int -> Maybe (Puzzle, [Move])
 solveOnePart accumMaybe goal = do
     (p, ms) <- accumMaybe
     (p', _, ms') <- partSolve goal p
@@ -95,7 +87,3 @@ moveChar LeftM = 'L'
 moveChar RightM = 'R'
 moveChar UpM = 'U'
 moveChar DownM = 'D'
-
-main :: IO ()
-main = do
-    print $ solve $ fromList [1,2,3,4,5,6,7,8,9,10,11,12,15,13,14,0]

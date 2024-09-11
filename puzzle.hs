@@ -1,5 +1,5 @@
 import AStar
-import HashTable
+import HashMap
 
 import Data.Array
 import Data.Maybe

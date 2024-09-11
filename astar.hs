@@ -1,7 +1,7 @@
 module AStar where
 
 import PriorityQueue
-import HashTable
+import HashMap
 import Data.STRef
 import Data.Maybe
 import Control.Monad.ST
@@ -19,22 +19,22 @@ repeatUntilSuccess f = do
 aStar :: (Eq a, Hashable a, Ord h, Num h) => a -> (a -> Bool) -> (a -> [(a, h, b)]) -> (a -> h) -> Maybe (a, h, [b])
 aStar start goal edges heuristic = runST $ do
     pq :: PriorityQueueM s (a, h, [b]) h <- emptyPQ
-    ht :: HashTableM s a Bool <- emptyHT
+    hm :: HashMapM s a Bool <- emptyHM
 
     insert pq (start, 0, []) (heuristic start)
 
-    repeatUntilSuccess (step pq ht)
+    repeatUntilSuccess (step pq hm)
 
-    where step pq ht = do
+    where step pq hm = do
             minMaybe <- extractMin pq
 
             case minMaybe of
                 Just (minNode, dist, path) -> do
-                    visited <- getHT ht minNode
+                    visited <- getHM hm minNode
                     case visited of
                         Just _ -> return $ Just Nothing
                         Nothing -> do
-                            putHT ht minNode True
+                            putHM hm minNode True
                             if goal minNode
                             then return $ Just $ Just (minNode, dist, reverse path)
                             else do

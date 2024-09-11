@@ -1,7 +1,6 @@
 module PriorityQueue where
 
 import ArrayList
-import HashTable
 import Data.STRef
 import Control.Monad.ST
 import Control.Monad

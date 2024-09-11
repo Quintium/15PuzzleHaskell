@@ -64,8 +64,8 @@ instance Hashable Puzzle where
     hash :: Puzzle -> Int
     hash (Puzzle _ tiles) = sum $ map (\(i, n) -> n * (16 ^ i)) $ assocs tiles
 
-solve :: Puzzle -> Maybe (Int, [Move])
-solve puzzle = (\(p, n, ms) -> (n, ms)) <$> aStar puzzle (== solvedPuzzle) getMoves heuristic
+solve :: Puzzle -> Maybe (Int, String)
+solve puzzle = (\(p, n, ms) -> (n, map moveChar ms)) <$> aStar puzzle (== solvedPuzzle) getMoves heuristic
 
 partSolve :: Int -> Puzzle -> Maybe (Puzzle, Int, [Move])
 partSolve n puzzle = aStar puzzle (\p -> heuristic p <= n) getMoves (\p -> max (heuristic p - n) 0)
@@ -77,7 +77,7 @@ solveOnePart :: Maybe (Puzzle, [Move]) -> Int -> Maybe (Puzzle, [Move])
 solveOnePart accumMaybe goal = do
     (p, ms) <- accumMaybe
     (p', _, ms') <- partSolve goal p
-    return $ trace (show goal) (p', ms ++ ms')
+    return $ trace ("Goal: " ++ show goal) (p', ms ++ ms')
 
 solveSuboptimal :: Puzzle -> Maybe (Int, String)
 solveSuboptimal puzzle = (\(p, n, ms) -> (n, map moveChar ms)) <$> solveInParts [20,10,7,5,3,0] puzzle
@@ -90,4 +90,4 @@ moveChar DownM = 'D'
 
 main :: IO ()
 main = do
-    print $ solveSuboptimal $ fromList [14,15,11,7,12,3,6,13,0,1,2,4,8,9,10,5]
+    print $ solveSuboptimal $ fromList [4,0,3,14,2,15,10,11,8,5,6,12,7,13,1,9]

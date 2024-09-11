@@ -1,0 +1,141 @@
+	Wed Sep 11 17:48 2024 Time and Allocation Profiling Report  (Final)
+
+	   puzzle.exe +RTS -p -RTS
+
+	total time  =        0.51 secs   (505 ticks @ 1000 us, 1 processor)
+	total alloc = 13,185,569,288 bytes  (excludes profiling overheads)
+
+COST CENTRE        MODULE        SRC                              %time %alloc
+
+hash.\             Main          puzzle.hs:65:51-62                23.0   16.9
+readAL             ArrayList     ArrayList.hs:(76,1)-(78,19)       16.8   25.8
+tileDistance       Main          puzzle.hs:(56,1)-(58,32)           8.3    7.5
+writeAL            ArrayList     ArrayList.hs:(81,1)-(83,22)        7.5   10.6
+heuristic          Main          puzzle.hs:61:1-76                  6.7    8.3
+bubbleDown         PriorityQueue PriorityQueue.hs:(52,1)-(75,32)    6.1    6.4
+indToCoords        Main          puzzle.hs:30:1-38                  5.3    1.3
+hash               Main          puzzle.hs:65:5-78                  3.8    4.9
+switch             PriorityQueue PriorityQueue.hs:(20,1)-(24,25)    3.0    3.1
+bubbleUp           PriorityQueue PriorityQueue.hs:(27,1)-(34,25)    2.8    2.0
+tileDistance.(...) Main          puzzle.hs:57:11-48                 1.8    2.6
+alLength           ArrayList     ArrayList.hs:(25,1)-(27,12)        1.6    1.1
+pushAL             ArrayList     ArrayList.hs:(45,1)-(58,9)         1.4    1.5
+getHM.pairsM       HashMap       HashMap.hs:43:9-42                 1.2    0.0
+alCapacity         ArrayList     ArrayList.hs:(19,1)-(22,29)        1.2    0.6
+tileDistance.(...) Main          puzzle.hs:58:11-32                 0.0    1.6
+
+
+                                                                                                               individual      inherited
+COST CENTRE                        MODULE                   SRC                             no.     entries  %time %alloc   %time %alloc
+
+MAIN                               MAIN                     <built-in>                      177           0    0.0    0.0   100.0  100.0
+ CAF                               GHC.IO.Encoding.CodePage <entire-module>                 303           0    0.0    0.0     0.0    0.0
+ CAF                               ArrayList                <entire-module>                 295           0    0.0    0.0     0.0    0.0
+  emptyAL                          ArrayList                ArrayList.hs:(39,1)-(42,27)     362           1    0.0    0.0     0.0    0.0
+  minALCapacity                    ArrayList                ArrayList.hs:16:1-17            364           1    0.0    0.0     0.0    0.0
+ CAF                               GHC.IO.Handle.FD         <entire-module>                 240           0    0.0    0.0     0.0    0.0
+ CAF                               GHC.IO.StdHandles        <entire-module>                 236           0    0.0    0.0     0.0    0.0
+ CAF                               GHC.IO.Encoding          <entire-module>                 234           0    0.0    0.0     0.0    0.0
+ CAF                               Debug.Trace              <entire-module>                 201           0    0.0    0.0     0.0    0.0
+ CAF                               Main                     <entire-module>                 184           0    0.0    0.0   100.0  100.0
+  main                             Main                     puzzle.hs:(92,1)-(93,78)        354           1    0.0    0.0   100.0  100.0
+   fromList                        Main                     puzzle.hs:(33,1)-(34,56)        390           1    0.0    0.0     0.0    0.0
+    fromList.hole                  Main                     puzzle.hs:34:11-56              406           1    0.0    0.0     0.0    0.0
+     indToCoords                   Main                     puzzle.hs:30:1-38               407           1    0.0    0.0     0.0    0.0
+   solveSuboptimal                 Main                     puzzle.hs:83:1-102              356           1    0.0    0.0   100.0  100.0
+    solveInParts                   Main                     puzzle.hs:74:1-109              357           1    0.0    0.0   100.0  100.0
+     solveOnePart                  Main                     puzzle.hs:(77,1)-(80,46)        358           6    0.0    0.0   100.0  100.0
+      partSolve                    Main                     puzzle.hs:71:1-99               359           6    0.0    0.0   100.0  100.0
+       aStar                       AStar                    AStar.hs:(20,1)-(46,41)         360           6    0.0    0.0   100.0  100.0
+        repeatUntilSuccess         AStar                    AStar.hs:(12,1)-(17,44)         371       89191    0.0    0.0   100.0  100.0
+         aStar.step                AStar                    AStar.hs:(28,11)-(46,41)        373           0    1.0    0.5   100.0  100.0
+          aStar.step.\             AStar                    AStar.hs:(41,83)-(43,109)       414      151932    0.4    0.2    30.5   31.4
+           aStar.step.\.newDist    AStar                    AStar.hs:42:41-60               422      151932    0.0    0.0     0.0    0.0
+           insert                  PriorityQueue            PriorityQueue.hs:(14,1)-(17,23) 415      151932    0.8    0.3    10.9   15.0
+            bubbleUp               PriorityQueue            PriorityQueue.hs:(27,1)-(34,25) 419      415362    2.8    2.0     7.7   12.6
+             readAL                ArrayList                ArrayList.hs:(76,1)-(78,19)     420      830686    2.0    4.2     2.0    4.2
+             bubbleUp.j            PriorityQueue            PriorityQueue.hs:29:13-29       421      415343    0.2    0.2     0.2    0.2
+             switch                PriorityQueue            PriorityQueue.hs:(20,1)-(24,25) 442      263430    0.6    0.8     2.8    6.2
+              readAL               ArrayList                ArrayList.hs:(76,1)-(78,19)     443      526860    0.8    2.7     0.8    2.7
+              writeAL              ArrayList                ArrayList.hs:(81,1)-(83,22)     444      526860    1.4    2.8     1.4    2.8
+            alLength               ArrayList                ArrayList.hs:(25,1)-(27,12)     418      151932    0.0    0.2     0.0    0.2
+            pushAL                 ArrayList                ArrayList.hs:(45,1)-(58,9)      416      151932    1.4    1.5     2.4    1.9
+             alCapacity            ArrayList                ArrayList.hs:(19,1)-(22,29)     417      151932    1.0    0.4     1.0    0.4
+           partSolve.\             Main                     puzzle.hs:71:76-98              423      151932    0.8    0.1    19.2   16.1
+            heuristic              Main                     puzzle.hs:61:1-76               424      151932    5.1    6.3    18.4   16.1
+             tileDistance          Main                     puzzle.hs:(56,1)-(58,32)        431     2430912    7.7    5.7    13.3    9.8
+              tileDistance.(...)   Main                     puzzle.hs:57:11-48              438     2278980    1.2    1.9     3.8    2.4
+               indToCoords         Main                     puzzle.hs:30:1-38               439     2278980    2.6    0.5     2.6    0.5
+              tileDistance.(...)   Main                     puzzle.hs:58:11-32              435     2278980    0.0    1.2     1.4    1.7
+               indToCoords         Main                     puzzle.hs:30:1-38               436     2278980    1.4    0.5     1.4    0.5
+              tileDistance.solvedX Main                     puzzle.hs:57:11-48              437     2278980    0.0    0.0     0.0    0.0
+              tileDistance.solvedY Main                     puzzle.hs:57:11-48              441     2278980    0.2    0.0     0.2    0.0
+              tileDistance.x       Main                     puzzle.hs:58:11-32              434     2278980    0.2    0.0     0.2    0.0
+              tileDistance.y       Main                     puzzle.hs:58:11-32              440     2278980    0.0    0.0     0.0    0.0
+          getHM                    HashMap                  HashMap.hs:(41,1)-(46,41)       387       89191    0.8    0.3    18.8   14.8
+           getHM.pairsM            HashMap                  HashMap.hs:43:9-42              388       89191    1.2    0.0    17.0   14.1
+            hash                   Main                     puzzle.hs:65:5-78               389       89191    2.0    3.1    15.8   14.1
+             hash.\                Main                     puzzle.hs:65:51-62              391     1427056   13.9   10.9    13.9   10.9
+           ==                      Main                     puzzle.hs:9:58-59               453       39973    1.0    0.3     1.0    0.3
+          partSolve.\              Main                     puzzle.hs:71:42-57              393       49218    0.0    0.0     4.2    5.2
+           heuristic               Main                     puzzle.hs:61:1-76               394       49218    1.6    2.0     4.2    5.2
+            tileDistance           Main                     puzzle.hs:(56,1)-(58,32)        395      787488    0.6    1.8     2.6    3.2
+             tileDistance.(...)    Main                     puzzle.hs:57:11-48              400      738270    0.6    0.6     1.6    0.8
+              indToCoords          Main                     puzzle.hs:30:1-38               401      738270    1.0    0.2     1.0    0.2
+             tileDistance.(...)    Main                     puzzle.hs:58:11-32              397      738270    0.0    0.4     0.4    0.6
+              indToCoords          Main                     puzzle.hs:30:1-38               398      738270    0.4    0.2     0.4    0.2
+             tileDistance.solvedX  Main                     puzzle.hs:57:11-48              399      738270    0.0    0.0     0.0    0.0
+             tileDistance.solvedY  Main                     puzzle.hs:57:11-48              403      738270    0.0    0.0     0.0    0.0
+             tileDistance.x        Main                     puzzle.hs:58:11-32              396      738270    0.0    0.0     0.0    0.0
+             tileDistance.y        Main                     puzzle.hs:58:11-32              402      738270    0.0    0.0     0.0    0.0
+          putHM                    HashMap                  HashMap.hs:(32,1)-(34,72)       392       49218    0.4    0.5    11.3    8.3
+           hash                    Main                     puzzle.hs:65:5-78               447       49212    1.8    1.7    10.9    7.8
+            hash.\                 Main                     puzzle.hs:65:51-62              448      787392    9.1    6.0     9.1    6.0
+           updateNode              HashMap                  HashMap.hs:(37,1)-(38,144)      449       49212    0.0    0.0     0.0    0.0
+          getMoves                 Main                     puzzle.hs:40:1-71               404       49212    0.0    0.1     1.8    1.7
+           getMove                 Main                     puzzle.hs:(43,1)-(46,36)        405      196848    0.6    0.4     1.8    1.6
+            getMove.(...)          Main                     puzzle.hs:46:11-36              411      196848    0.0    0.0     0.2    0.1
+             moveCoords            Main                     puzzle.hs:(18,1)-(21,26)        412      196848    0.2    0.1     0.2    0.1
+            getMove.dx             Main                     puzzle.hs:46:11-36              410      196848    0.0    0.0     0.0    0.0
+            getMove.newHole        Main                     puzzle.hs:45:11-38              409      196848    0.0    0.0     0.0    0.0
+            inBounds               Main                     puzzle.hs:24:1-54               408      196848    0.2    0.2     0.2    0.2
+            getMove.dy             Main                     puzzle.hs:46:11-36              413      174486    0.0    0.0     0.0    0.0
+            getMove.newPuzzle      Main                     puzzle.hs:44:11-69              425      151932    0.2    0.1     0.8    0.9
+             switchTiles           Main                     puzzle.hs:(49,1)-(53,25)        426      151932    0.4    0.6     0.6    0.8
+              switchTiles.i1       Main                     puzzle.hs:50:11-29              427      151932    0.0    0.0     0.0    0.1
+               coordsToInd         Main                     puzzle.hs:27:1-30               428      151932    0.0    0.1     0.0    0.1
+              switchTiles.i2       Main                     puzzle.hs:51:11-29              429      151932    0.0    0.0     0.0    0.1
+               coordsToInd         Main                     puzzle.hs:27:1-30               430      151932    0.0    0.1     0.0    0.1
+              switchTiles.n1       Main                     puzzle.hs:52:11-25              432      151932    0.2    0.0     0.2    0.0
+              switchTiles.n2       Main                     puzzle.hs:53:11-25              433      151932    0.0    0.0     0.0    0.0
+          extractMin               PriorityQueue            PriorityQueue.hs:(37,1)-(49,23) 375           0    0.6    0.4    32.5   38.1
+           bubbleDown              PriorityQueue            PriorityQueue.hs:(52,1)-(75,32) 384      745025    6.1    6.4    29.9   34.4
+            readAL                 ArrayList                ArrayList.hs:(76,1)-(78,19)     445     2178007    8.9   11.0     8.9   11.0
+            alLength               ArrayList                ArrayList.hs:(25,1)-(27,12)     385      745025    1.2    0.8     1.2    0.8
+            bubbleDown.j1          PriorityQueue            PriorityQueue.hs:53:9-20        386      745025    0.6    0.3     0.6    0.3
+            bubbleDown.j2          PriorityQueue            PriorityQueue.hs:54:9-20        446      726016    0.6    0.3     0.6    0.3
+            switch                 PriorityQueue            PriorityQueue.hs:(20,1)-(24,25) 450      655834    2.4    2.0    12.5   15.6
+             readAL                ArrayList                ArrayList.hs:(76,1)-(78,19)     451     1311668    4.8    6.6     4.8    6.6
+             writeAL               ArrayList                ArrayList.hs:(81,1)-(83,22)     452     1311668    5.3    6.9     5.3    6.9
+           alLength                ArrayList                ArrayList.hs:(25,1)-(27,12)     377       89191    0.4    0.1     0.4    0.1
+           popAL                   ArrayList                ArrayList.hs:(61,1)-(73,48)     382       89191    0.2    0.4     0.4    0.7
+            alCapacity             ArrayList                ArrayList.hs:(19,1)-(22,29)     383       89191    0.2    0.2     0.2    0.2
+           readAL                  ArrayList                ArrayList.hs:(76,1)-(78,19)     381       89191    0.0    0.4     0.0    0.4
+           switch                  PriorityQueue            PriorityQueue.hs:(20,1)-(24,25) 378       89191    0.0    0.3     1.2    2.1
+            readAL                 ArrayList                ArrayList.hs:(76,1)-(78,19)     379      178382    0.4    0.9     0.4    0.9
+            writeAL                ArrayList                ArrayList.hs:(81,1)-(83,22)     380      178382    0.8    0.9     0.8    0.9
+        aStar.step                 AStar                    AStar.hs:(28,11)-(46,41)        372           6    0.0    0.0     0.0    0.0
+         extractMin                PriorityQueue            PriorityQueue.hs:(37,1)-(49,23) 374           6    0.0    0.0     0.0    0.0
+          alLength                 ArrayList                ArrayList.hs:(25,1)-(27,12)     376           6    0.0    0.0     0.0    0.0
+        emptyHM                    HashMap                  HashMap.hs:(22,1)-(24,25)       365           6    0.0    0.0     0.0    0.0
+        emptyPQ                    PriorityQueue            PriorityQueue.hs:11:1-36        361           6    0.0    0.0     0.0    0.0
+         emptyAL                   ArrayList                ArrayList.hs:(39,1)-(42,27)     363           0    0.0    0.0     0.0    0.0
+        insert                     PriorityQueue            PriorityQueue.hs:(14,1)-(17,23) 366           6    0.0    0.0     0.0    0.0
+         alLength                  ArrayList                ArrayList.hs:(25,1)-(27,12)     369           6    0.0    0.0     0.0    0.0
+         bubbleUp                  PriorityQueue            PriorityQueue.hs:(27,1)-(34,25) 370           6    0.0    0.0     0.0    0.0
+         pushAL                    ArrayList                ArrayList.hs:(45,1)-(58,9)      367           6    0.0    0.0     0.0    0.0
+          alCapacity               ArrayList                ArrayList.hs:(19,1)-(22,29)     368           6    0.0    0.0     0.0    0.0
+     solveInParts.\                Main                     puzzle.hs:74:42-59              454           1    0.0    0.0     0.0    0.0
+    solveSuboptimal.\              Main                     puzzle.hs:83:42-61              455           1    0.0    0.0     0.0    0.0
+     moveChar                      Main                     puzzle.hs:(86,1)-(89,20)        456          81    0.0    0.0     0.0    0.0
+ main                              Main                     puzzle.hs:(92,1)-(93,78)        355           0    0.0    0.0     0.0    0.0

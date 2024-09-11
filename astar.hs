@@ -7,6 +7,7 @@ import Data.Maybe
 import Control.Monad.ST
 import Control.Monad
 import Debug.Trace
+import Distribution.Compat.Graph (IsNode(nodeNeighbors))
 
 repeatUntilSuccess :: Monad m => m (Maybe (Maybe a)) -> m (Maybe a)
 repeatUntilSuccess f = do
@@ -20,12 +21,15 @@ aStar :: (Eq a, Hashable a, Ord h, Num h) => a -> (a -> Bool) -> (a -> [(a, h, b
 aStar start goal edges heuristic = runST $ do
     pq :: PriorityQueueM s (a, h, [b]) h <- emptyPQ
     hm :: HashMapM s a Bool <- emptyHM
+    nodes <- newSTRef 0
 
     insert pq (start, 0, []) (heuristic start)
 
-    repeatUntilSuccess (step pq hm)
+    res <- repeatUntilSuccess (step pq hm nodes)
+    n <- readSTRef nodes
+    return $ trace ("Nodes: " ++ show n) res
 
-    where step pq hm = do
+    where step pq hm nodes = do
             minMaybe <- extractMin pq
 
             case minMaybe of
@@ -41,6 +45,7 @@ aStar start goal edges heuristic = runST $ do
                                 forM_ (edges minNode) $ \(neighbor, len, edge) -> do
                                     let newDist = dist + len
                                     insert pq (neighbor, newDist, edge : path) (newDist + heuristic neighbor)
+                                    modifySTRef nodes (+1)
                             
                                 return $ Just Nothing
                 Nothing -> return Nothing

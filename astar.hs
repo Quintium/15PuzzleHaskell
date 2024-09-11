@@ -18,38 +18,31 @@ repeatUntilSuccess f = do
 
 aStar :: (Eq a, Hashable a, Ord h, Num h) => a -> (a -> Bool) -> (a -> [(a, h, b)]) -> (a -> h) -> Maybe (a, h, [b])
 aStar start goal edges heuristic = runST $ do
-    pq :: PriorityQueueM s a h <- emptyPQ
-    ht :: HashTableM s a (h, [b]) <- emptyHT
+    pq :: PriorityQueueM s (a, h, [b]) h <- emptyPQ
+    ht :: HashTableM s a Bool <- emptyHT
 
-    decreaseWeight pq start (heuristic start)
-    putHT ht start (0, [])
+    insert pq (start, 0, []) (heuristic start)
 
-    success <- repeatUntilSuccess (step pq ht)
-    case success of
-        Nothing -> return Nothing
-        Just end -> do
-            entry <- getHT ht end
-            let (dist, path) = fromJust entry
-            return $ Just (end, dist, reverse path)
+    repeatUntilSuccess (step pq ht)
 
     where step pq ht = do
             minMaybe <- extractMin pq
+
             case minMaybe of
-                Just min -> do
-                    if goal min
-                    then return $ Just $ Just min
-                    else do
-                        entry <- getHT ht min
-                        let (dist, path) = fromJust entry
-                        forM_ (edges min) $ \(vertice, len, edge) -> do
-                            let newDist = dist + len
-                            statsMaybe <- getHT ht vertice
-                            let better = maybe True (\(currDist, _) -> newDist < currDist) statsMaybe
-                            when better $ do
-                                decreaseWeight pq vertice (newDist + heuristic vertice)
-                                putHT ht vertice (newDist, edge : path)
+                Just (minNode, dist, path) -> do
+                    visited <- getHT ht minNode
+                    case visited of
+                        Just _ -> return $ Just Nothing
+                        Nothing -> do
+                            putHT ht minNode True
+                            if goal minNode
+                            then return $ Just $ Just (minNode, dist, reverse path)
+                            else do
+                                forM_ (edges minNode) $ \(neighbor, len, edge) -> do
+                                    let newDist = dist + len
+                                    insert pq (neighbor, newDist, edge : path) (newDist + heuristic neighbor)
                             
-                        return $ Just Nothing
+                                return $ Just Nothing
                 Nothing -> return Nothing
 
 edge1 :: Int -> [(Int, Int, String)]

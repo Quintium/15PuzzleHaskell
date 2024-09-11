@@ -36,10 +36,10 @@ fromList ns = Puzzle hole $ listArray (0,15) ns
 solvedPuzzle :: Puzzle
 solvedPuzzle = fromList ([1..15] ++ [0])
 
-getMoves :: Puzzle -> [(Puzzle, Int, Move)]
+getMoves :: Puzzle -> [(Puzzle, Float, Move)]
 getMoves puzzle = mapMaybe (getMove puzzle) [LeftM, RightM, UpM, DownM]
 
-getMove :: Puzzle -> Move -> Maybe (Puzzle, Int, Move)
+getMove :: Puzzle -> Move -> Maybe (Puzzle, Float, Move)
 getMove (Puzzle hole@(hx, hy) tiles) move = if inBounds newHole then Just (newPuzzle, 1, move) else Nothing
     where newPuzzle = Puzzle newHole $ switchTiles tiles hole newHole
           newHole = (hx + dx, hy + dy)
@@ -72,16 +72,16 @@ instance Hashable Puzzle where
     hash :: Puzzle -> Int
     hash (Puzzle _ tiles) = sum $ map (\(i, n) -> n * (16 ^ i)) $ assocs tiles
 
-partSolve :: Int -> Puzzle -> Maybe (Puzzle, Int, [Move])
-partSolve n puzzle = aStar puzzle (\p -> heuristic p <= n) getMoves (\p -> max (heuristic p - n) 0)
+solve :: Puzzle -> Maybe (Float, [Move])
+solve puzzle = (\(p, n, ms) -> (n, ms)) <$> aStar puzzle (== solvedPuzzle) getMoves inversionsH
 
-solve :: Puzzle -> Maybe (Int, [Move])
-solve puzzle = (\(p, n, ms) -> (n, ms)) <$> aStar puzzle (== solvedPuzzle) getMoves heuristic
+partSolve :: Float -> Puzzle -> Maybe (Puzzle, Float, [Move])
+partSolve n puzzle = aStar puzzle (\p -> inversionsH p <= n) getMoves (\p -> max (inversionsH p - n) 0)
 
-solveInParts :: [Int] -> Puzzle -> Maybe (Puzzle, Int, [Move])
+solveInParts :: [Float] -> Puzzle -> Maybe (Puzzle, Int, [Move])
 solveInParts steps puzzle = (\(p, ms) -> (p, length ms, ms)) <$> foldl solveOnePart (Just (puzzle, [])) steps
 
-solveOnePart :: Maybe (Puzzle, [Move]) -> Int -> Maybe (Puzzle, [Move])
+solveOnePart :: Maybe (Puzzle, [Move]) -> Float -> Maybe (Puzzle, [Move])
 solveOnePart accumMaybe goal = do
     (p, ms) <- accumMaybe
     (p', _, ms') <- partSolve goal p

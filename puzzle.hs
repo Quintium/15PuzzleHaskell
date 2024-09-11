@@ -5,8 +5,12 @@ import Data.Array
 import Data.Maybe
 import Data.List
 
-data Puzzle = Puzzle (Int, Int) (Array Int Int) deriving (Show, Eq)
+data Puzzle = Puzzle (Int, Int) (Array Int Int) deriving Eq
 data Move = LeftM | RightM | UpM | DownM deriving Show
+
+instance Show Puzzle where
+    show :: Puzzle -> String
+    show (Puzzle _ tiles) = show $ elems tiles
 
 -- how the hole moves during moves
 moveCoords :: Move -> (Int, Int)
@@ -59,8 +63,23 @@ instance Hashable Puzzle where
     hash :: Puzzle -> Int
     hash (Puzzle _ tiles) = sum $ map (\(i, n) -> n * (16 ^ i)) $ assocs tiles
 
+partSolve :: Int -> Puzzle -> Maybe (Puzzle, Int, [Move])
+partSolve n puzzle = aStar puzzle (\p -> heuristic p <= n) getMoves (\p -> max (heuristic p - n) 0)
+
 solve :: Puzzle -> Maybe (Int, [Move])
-solve puzzle = aStar puzzle solvedPuzzle getMoves heuristic
+solve puzzle = (\(p, n, ms) -> (n, ms)) <$> aStar puzzle (== solvedPuzzle) getMoves heuristic
+
+solveInParts :: [Int] -> Puzzle -> Maybe (Puzzle, Int, [Move])
+solveInParts steps puzzle = (\(p, ms) -> (p, length ms, ms)) <$> foldl solveOnePart (Just (puzzle, [])) steps
+
+solveOnePart :: Maybe (Puzzle, [Move]) -> Int -> Maybe (Puzzle, [Move])
+solveOnePart accumMaybe goal = do
+    (p, ms) <- accumMaybe
+    (p', _, ms') <- partSolve goal p
+    return (p', ms ++ ms')
+
+solveSuboptimal :: Puzzle -> Maybe (Int, [Move])
+solveSuboptimal puzzle = (\(p, n, ms) -> (n, ms)) <$> solveInParts [10,5,0] puzzle
 
 main :: IO ()
 main = do

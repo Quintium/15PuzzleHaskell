@@ -87,3 +87,7 @@ moveChar LeftM = 'L'
 moveChar RightM = 'R'
 moveChar UpM = 'U'
 moveChar DownM = 'D'
+
+main :: IO ()
+main = do
+    print $ solveSuboptimal $ fromList [14,15,11,7,12,3,6,13,0,1,2,4,8,9,10,5]

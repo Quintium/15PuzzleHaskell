@@ -9,9 +9,9 @@ import Debug.Trace
 
 aStar :: (Eq a, Hashable a, Ord h, Num h) => a -> (a -> Bool) -> (a -> [(a, h, b)]) -> (a -> h) -> Maybe (a, h, [b])
 aStar start goal edges heuristic = evalState (repeatUntilSuccess $ aStarStep goal edges heuristic) (startPQ, emptyHM)
-    where startPQ = insert (emptyPQ :: PriorityQueue (a, h, [b]) h) (start, 0, []) (heuristic start)
+    where startPQ = insert emptyPQ (start, 0, []) (heuristic start)
 
-aStarStep :: (Eq a, Hashable a, Ord h, Num h) => (a -> Bool) -> (a -> [(a, h, b)]) -> (a -> h) -> State (PriorityQueue (a, h, [b]) h, HashMap a Bool) (Maybe (Maybe (a, h, [b])))
+aStarStep :: (Eq a, Hashable a, Ord h, Num h) => (a -> Bool) -> (a -> [(a, h, b)]) -> (a -> h) -> State (SkewHeap (a, h, [b]) h, HashMap a Bool) (Maybe (Maybe (a, h, [b])))
 aStarStep goal edges heuristic = do
     (pq, hm) <- get
 

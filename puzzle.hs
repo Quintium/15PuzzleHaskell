@@ -6,7 +6,7 @@ import Data.Maybe
 import Data.List
 import Debug.Trace
 
-data Puzzle = Puzzle (Int, Int) (Array Int Int) Int Int deriving Eq
+data Puzzle = Puzzle Int (Array Int Int) Int Int deriving Eq
 data Move = LeftM | RightM | UpM | DownM deriving Show
 
 instance Show Puzzle where
@@ -41,6 +41,11 @@ manualHash tiles = sum $ map (\(i, n) -> n * (16 ^ i)) $ assocs tiles
 manualHeuristic :: Array Int Int -> Int
 manualHeuristic tiles = sum $ map (uncurry tileDistance) $ assocs tiles
 
+tileDistance :: Int -> Int -> Int
+tileDistance i n = if n == 0 then 0 else abs (x - solvedX) + abs(y - solvedY)
+    where (solvedX, solvedY) = indToCoords (n-1)
+          (x, y) = indToCoords i
+
 instance Hashable Puzzle where
     hash :: Puzzle -> Int
     hash (Puzzle _ _ h _) = h
@@ -51,7 +56,7 @@ heuristic (Puzzle _ _ _ h) = h
 fromList :: [Int] -> Puzzle
 fromList ns = Puzzle hole tiles (manualHash tiles) (manualHeuristic tiles)
     where tiles = listArray (0,15) ns
-          hole = indToCoords $ fromJust $ elemIndex 0 ns
+          hole = fromJust $ elemIndex 0 ns
 
 solvedPuzzle :: Puzzle
 solvedPuzzle = fromList ([1..15] ++ [0])
@@ -60,30 +65,23 @@ getMoves :: Puzzle -> [(Puzzle, Int, Move)]
 getMoves puzzle = mapMaybe (getMove puzzle) [LeftM, RightM, UpM, DownM]
 
 getMove :: Puzzle -> Move -> Maybe (Puzzle, Int, Move)
-getMove (Puzzle hole@(hx, hy) tiles hash heur) move = if inBounds newHole then Just (newPuzzle, 1, move) else Nothing
-    where newPuzzle = Puzzle newHole (switchTiles tiles hole newHole) newHash newHeur
-          newHash = hash + movedTile * (16 ^ holeInd - 16 ^ newHoleInd)
-          newHeur = heur + tileDistance holeInd movedTile - tileDistance newHoleInd movedTile
-          movedTile = tiles ! newHoleInd
-          holeInd = coordsToInd hole
-          newHoleInd = coordsToInd newHole
-          newHole = (hx + dx, hy + dy)
+getMove (Puzzle holeInd tiles hash heur) move = if inBounds (mx, my) then Just (newPuzzle, 1, move) else Nothing
+    where newPuzzle = Puzzle movedInd newTiles newHash newHeur
+          newTiles = tiles // [(holeInd, movedTile), (movedInd, 0)]
+          newHash = hash + movedTile * (16 ^ holeInd - 16 ^ movedInd)
+          newHeur = heur + tileDistance holeInd movedTile - tileDistance movedInd movedTile
+
+          movedTile = tiles ! movedInd
+          movedInd = coordsToInd (mx, my)
+          (mx, my) = (hx + dx, hy + dy)
           (dx, dy) = moveCoords move
-
-switchTiles :: Array Int Int -> (Int, Int) -> (Int, Int) -> Array Int Int
-switchTiles tiles c1 c2 = tiles // [(i1, n2), (i2, n1)]
-    where i1 = coordsToInd c1
-          i2 = coordsToInd c2
-          n1 = tiles ! i1
-          n2 = tiles ! i2
-
-tileDistance :: Int -> Int -> Int
-tileDistance i n = if n == 0 then 0 else abs (x - solvedX) + abs(y - solvedY)
-    where (solvedX, solvedY) = indToCoords (n-1)
-          (x, y) = indToCoords i
+          (hx, hy) = indToCoords holeInd
 
 optimalSolve :: Puzzle -> Maybe (Int, String)
 optimalSolve puzzle = (\(p, n, ms) -> (n, map moveChar ms)) <$> aStar puzzle (== solvedPuzzle) getMoves heuristic
+
+suboptimalSolve :: Puzzle -> Maybe (Int, String)
+suboptimalSolve = solveInParts [10,0]
 
 solveInParts :: [Int] -> Puzzle -> Maybe (Int, String)
 solveInParts steps puzzle = do
@@ -94,9 +92,6 @@ solveInPartsWithPuzzle :: [Int] -> Puzzle -> Maybe (Puzzle, Int, String)
 solveInPartsWithPuzzle steps puzzle = do
     (p, ms) <- foldl solveOnePart (Just (puzzle, [])) steps
     return (p, length ms, map moveChar ms)
-
-suboptimalSolve :: Puzzle -> Maybe (Int, String)
-suboptimalSolve = solveInParts [10,0]
 
 solveOnePart :: Maybe (Puzzle, [Move]) -> Int -> Maybe (Puzzle, [Move])
 solveOnePart accumMaybe goal = do

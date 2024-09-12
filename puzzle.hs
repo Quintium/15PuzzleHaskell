@@ -92,6 +92,10 @@ optimalSolve puzzle = (\(p, n, ms) -> (n, map moveChar ms)) <$> aStar puzzle (==
 suboptimalSolve :: Puzzle -> Maybe (Int, String)
 suboptimalSolve = solveInParts [10]
 
+-- very suboptimal solver for the hardest puzzles, should take a reasonable amount of time on any puzzle
+verySuboptimalSolve :: Puzzle -> Maybe (Int, String)
+verySuboptimalSolve = solveInParts [25, 10, 5]
+
 -- solve 15 puzzle in parts, by iteratively applying A* to find positions with lower and lower heuristics
 solveInParts :: [Int] -> Puzzle -> Maybe (Int, String)
 solveInParts steps puzzle = do

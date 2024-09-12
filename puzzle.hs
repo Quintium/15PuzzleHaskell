@@ -20,6 +20,12 @@ moveCoords RightM = (-1, 0)
 moveCoords UpM = (0, 1)
 moveCoords DownM = (0, -1)
 
+moveChar :: Move -> Char
+moveChar LeftM = 'L'
+moveChar RightM = 'R'
+moveChar UpM = 'U'
+moveChar DownM = 'D'
+
 inBounds :: (Int, Int) -> Bool
 inBounds (x, y) = 0 <= x && x <= 3 && 0 <= y && y <= 3
 
@@ -28,6 +34,19 @@ coordsToInd (x, y) = 4 * y + x
 
 indToCoords :: Int -> (Int, Int)
 indToCoords n = (n `mod` 4, n `div` 4)
+
+manualHash :: Array Int Int -> Int
+manualHash tiles = sum $ map (\(i, n) -> n * (16 ^ i)) $ assocs tiles
+
+manualHeuristic :: Array Int Int -> Int
+manualHeuristic tiles = sum $ map (uncurry tileDistance) $ assocs tiles
+
+instance Hashable Puzzle where
+    hash :: Puzzle -> Int
+    hash (Puzzle _ _ h _) = h
+
+heuristic :: Puzzle -> Int
+heuristic (Puzzle _ _ _ h) = h
 
 fromList :: [Int] -> Puzzle
 fromList ns = Puzzle hole tiles (manualHash tiles) (manualHeuristic tiles)
@@ -63,43 +82,28 @@ tileDistance i n = if n == 0 then 0 else abs (x - solvedX) + abs(y - solvedY)
     where (solvedX, solvedY) = indToCoords (n-1)
           (x, y) = indToCoords i
 
-manualHash :: Array Int Int -> Int
-manualHash tiles = sum $ map (\(i, n) -> n * (16 ^ i)) $ assocs tiles
+optimalSolve :: Puzzle -> Maybe (Int, String)
+optimalSolve puzzle = (\(p, n, ms) -> (n, map moveChar ms)) <$> aStar puzzle (== solvedPuzzle) getMoves heuristic
 
-manualHeuristic :: Array Int Int -> Int
-manualHeuristic tiles = sum $ map (uncurry tileDistance) $ assocs tiles
+solveInParts :: [Int] -> Puzzle -> Maybe (Int, String)
+solveInParts steps puzzle = do
+    (_, ms) <- foldl solveOnePart (Just (puzzle, [])) steps
+    return (length ms, map moveChar ms)
 
-instance Hashable Puzzle where
-    hash :: Puzzle -> Int
-    hash (Puzzle _ _ h _) = h
+solveInPartsWithPuzzle :: [Int] -> Puzzle -> Maybe (Puzzle, Int, String)
+solveInPartsWithPuzzle steps puzzle = do
+    (p, ms) <- foldl solveOnePart (Just (puzzle, [])) steps
+    return (p, length ms, map moveChar ms)
 
-heuristic :: Puzzle -> Int
-heuristic (Puzzle _ _ _ h) = h
-
-solve :: Puzzle -> Maybe (Int, String)
-solve puzzle = (\(p, n, ms) -> (n, map moveChar ms)) <$> aStar puzzle (== solvedPuzzle) getMoves heuristic
-
-partSolve :: Int -> Puzzle -> Maybe (Puzzle, Int, [Move])
-partSolve n puzzle = aStar puzzle (\p -> heuristic p <= n) getMoves (\p -> max (heuristic p - n) 0)
-
-solveInParts :: [Int] -> Puzzle -> Maybe (Puzzle, Int, [Move])
-solveInParts steps puzzle = (\(p, ms) -> (p, length ms, ms)) <$> foldl solveOnePart (Just (puzzle, [])) steps
+suboptimalSolve :: Puzzle -> Maybe (Int, String)
+suboptimalSolve = solveInParts [10,0]
 
 solveOnePart :: Maybe (Puzzle, [Move]) -> Int -> Maybe (Puzzle, [Move])
 solveOnePart accumMaybe goal = do
-    (p, ms) <- accumMaybe
-    (p', _, ms') <- partSolve goal p
-    return $ trace ("Goal: " ++ show goal) (p', ms ++ ms')
-
-solveSuboptimal :: Puzzle -> Maybe (Int, String)
-solveSuboptimal puzzle = (\(p, n, ms) -> (n, map moveChar ms)) <$> solveInParts [20,10,7,5,3,0] puzzle
-
-moveChar :: Move -> Char
-moveChar LeftM = 'L'
-moveChar RightM = 'R'
-moveChar UpM = 'U'
-moveChar DownM = 'D'
+    (puzzle, ms) <- accumMaybe
+    (p', _, ms') <- aStar puzzle (\p -> heuristic p <= goal) getMoves (\p -> max (heuristic p - goal) 0)
+    return $ trace ("Goal achieved: " ++ show goal) (p', ms ++ ms')
 
 main :: IO ()
 main = do
-    print $ solveSuboptimal $ fromList [4,0,3,14,2,15,10,11,8,5,6,12,7,13,1,9]
+    print $ solveInParts [10,0] $ fromList [4,0,3,14,2,15,10,11,8,5,6,12,7,13,1,9]

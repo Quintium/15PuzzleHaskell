@@ -11,6 +11,7 @@ instance Hashable Int where
     hash :: Int -> Int
     hash k = (4231 * k + 4723) `mod` 295495199
 
+-- simple hashmap by wrapping an intmap and handling collisions using a simple list
 data HashMap k v = Hashable k => HashMap (IntMap [(k, v)])
 
 emptyHM :: Hashable k => HashMap k v

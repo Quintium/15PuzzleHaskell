@@ -6,6 +6,7 @@ import Data.Maybe
 import Data.List
 import Debug.Trace
 
+-- 15 Puzzle - Puzzle holeIndex tiles hash heuristic
 data Puzzle = Puzzle Int (Array Int Int) Int Int deriving Eq
 data Move = LeftM | RightM | UpM | DownM deriving Show
 
@@ -29,15 +30,18 @@ moveChar DownM = 'D'
 inBounds :: (Int, Int) -> Bool
 inBounds (x, y) = 0 <= x && x <= 3 && 0 <= y && y <= 3
 
+-- convert tile coordinates to tile array index and vice versa
 coordsToInd :: (Int, Int) -> Int
 coordsToInd (x, y) = 4 * y + x
 
 indToCoords :: Int -> (Int, Int)
 indToCoords n = (n `mod` 4, n `div` 4)
 
+-- simple polynomial hash
 manualHash :: Array Int Int -> Int
 manualHash tiles = sum $ map (\(i, n) -> n * (16 ^ i)) $ assocs tiles
 
+-- sum of manhattan distances of tiles (except hole)
 manualHeuristic :: Array Int Int -> Int
 manualHeuristic tiles = sum $ map (uncurry tileDistance) $ assocs tiles
 
@@ -61,13 +65,15 @@ fromList ns = Puzzle hole tiles (manualHash tiles) (manualHeuristic tiles)
 solvedPuzzle :: Puzzle
 solvedPuzzle = fromList ([1..15] ++ [0])
 
-getMoves :: Puzzle -> [(Puzzle, Int, Move)]
+getMoves :: Puzzle -> [(Move, Int, Puzzle)] -- integer in the middle is edge length, in this case 1
 getMoves puzzle = mapMaybe (getMove puzzle) [LeftM, RightM, UpM, DownM]
 
-getMove :: Puzzle -> Move -> Maybe (Puzzle, Int, Move)
-getMove (Puzzle holeInd tiles hash heur) move = if inBounds (mx, my) then Just (newPuzzle, 1, move) else Nothing
+getMove :: Puzzle -> Move -> Maybe (Move, Int, Puzzle)
+getMove (Puzzle holeInd tiles hash heur) move = if inBounds (mx, my) then Just (move, 1, newPuzzle) else Nothing
     where newPuzzle = Puzzle movedInd newTiles newHash newHeur
           newTiles = tiles // [(holeInd, movedTile), (movedInd, 0)]
+
+          -- incremental hash and heuristic calculation, very efficient
           newHash = hash + movedTile * (16 ^ holeInd - 16 ^ movedInd)
           newHeur = heur + tileDistance holeInd movedTile - tileDistance movedInd movedTile
 
@@ -77,19 +83,23 @@ getMove (Puzzle holeInd tiles hash heur) move = if inBounds (mx, my) then Just (
           (dx, dy) = moveCoords move
           (hx, hy) = indToCoords holeInd
 
+-- solve 15 puzzle optimally using A*
 optimalSolve :: Puzzle -> Maybe (Int, String)
 optimalSolve puzzle = (\(p, n, ms) -> (n, map moveChar ms)) <$> aStar puzzle (== solvedPuzzle) getMoves heuristic
 
+-- solve 15 puzzle suboptimally by first finding position with heuristic <= 10
 suboptimalSolve :: Puzzle -> Maybe (Int, String)
-suboptimalSolve = solveInParts [10,0]
+suboptimalSolve = solveInParts [10]
 
+-- solve 15 puzzle in parts, by iteratively applying A* to find positions with lower and lower heuristics
 solveInParts :: [Int] -> Puzzle -> Maybe (Int, String)
 solveInParts steps puzzle = do
-    (_, ms) <- foldl solveOnePart (Just (puzzle, [])) steps
+    (_, ms) <- foldl solveOnePart (Just (puzzle, [])) (steps ++ [0])
     return (length ms, map moveChar ms)
 
-solveInPartsWithPuzzle :: [Int] -> Puzzle -> Maybe (Puzzle, Int, String)
-solveInPartsWithPuzzle steps puzzle = do
+-- solveInParts, but doesn't solve until the end, returns final puzzle
+partSolveInParts :: [Int] -> Puzzle -> Maybe (Puzzle, Int, String)
+partSolveInParts steps puzzle = do
     (p, ms) <- foldl solveOnePart (Just (puzzle, [])) steps
     return (p, length ms, map moveChar ms)
 
@@ -99,6 +109,7 @@ solveOnePart accumMaybe goal = do
     (p', _, ms') <- aStar puzzle (\p -> heuristic p <= goal) getMoves (\p -> max (heuristic p - goal) 0)
     return $ trace ("Goal achieved: " ++ show goal) (p', ms ++ ms')
 
+-- main test function used for profiling
 main :: IO ()
 main = do
     print $ solveInParts [10,0] $ fromList [4,0,3,14,2,15,10,11,8,5,6,12,7,13,1,9]

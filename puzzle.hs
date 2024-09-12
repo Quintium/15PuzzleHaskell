@@ -57,6 +57,7 @@ instance Hashable Puzzle where
 heuristic :: Puzzle -> Int
 heuristic (Puzzle _ _ _ h) = h
 
+-- generates 15 puzzle from list of tiles row by row
 fromList :: [Int] -> Puzzle
 fromList ns = Puzzle hole tiles (manualHash tiles) (manualHeuristic tiles)
     where tiles = listArray (0,15) ns

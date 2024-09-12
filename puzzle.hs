@@ -112,4 +112,4 @@ solveOnePart accumMaybe goal = do
 -- main test function used for profiling
 main :: IO ()
 main = do
-    print $ solveInParts [10,0] $ fromList [4,0,3,14,2,15,10,11,8,5,6,12,7,13,1,9]
+    print $ suboptimalSolve $ fromList [4,0,3,14,2,15,10,11,8,5,6,12,7,13,1,9]

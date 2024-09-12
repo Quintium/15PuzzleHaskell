@@ -1,0 +1,118 @@
+	Thu Sep 12 14:20 2024 Time and Allocation Profiling Report  (Final)
+
+	   puzzle.exe +RTS -p -RTS
+
+	total time  =        0.11 secs   (112 ticks @ 1000 us, 1 processor)
+	total alloc = 2,432,872,760 bytes  (excludes profiling overheads)
+
+COST CENTRE        MODULE        SRC                              %time %alloc
+
+getMove.newHash    Main          puzzle.hs:77:11-69                19.6   16.6
+aStarStep          AStar         AStar.hs:(25,1)-(50,38)           13.4   10.5
++++                PriorityQueue PriorityQueue.hs:(12,1)-(16,96)   11.6    7.7
+tileDistance       Main          puzzle.hs:(49,1)-(51,32)           9.8    9.3
+indToCoords        Main          puzzle.hs:38:1-38                  8.0    2.1
+getMove            Main          puzzle.hs:(72,1)-(84,40)           4.5   11.6
+==                 Main          puzzle.hs:10:59-60                 4.5    3.6
+getHM              HashMap       HashMap.hs:(33,1)-(35,37)          4.5    2.3
+getMove.newHeur    Main          puzzle.hs:78:11-91                 3.6    1.9
+tileDistance.(...) Main          puzzle.hs:50:11-48                 2.7    3.2
+inBounds           Main          puzzle.hs:31:1-54                  2.7    2.7
+putHM              HashMap       HashMap.hs:21:1-76                 2.7    5.2
+repeatUntilSuccess AStar         AStar.hs:(54,1)-(58,39)            1.8    1.2
+tileDistance.(...) Main          puzzle.hs:51:11-32                 0.9    2.1
+getMove.newTiles   Main          puzzle.hs:74:11-67                 0.9    2.7
+aStarStep.\.nextPQ AStar         AStar.hs:48:33-118                 0.9    2.2
+aStarStep.\        AStar         AStar.hs:(45,75)-(49,48)           0.9    6.5
+solveOnePart.\     Main          puzzle.hs:109:78-103               0.0    1.0
+getMoves           Main          puzzle.hs:69:1-71                  0.0    1.3
+getMove.(...)      Main          puzzle.hs:84:11-40                 0.0    1.4
+
+
+                                                                                                             individual      inherited
+COST CENTRE                      MODULE                   SRC                             no.     entries  %time %alloc   %time %alloc
+
+MAIN                             MAIN                     <built-in>                      190           0    0.0    0.0   100.0  100.0
+ CAF                             GHC.IO.Encoding.CodePage <entire-module>                 334           0    0.0    0.0     0.0    0.0
+ CAF                             GHC.IO.Handle.FD         <entire-module>                 251           0    0.0    0.0     0.0    0.0
+ CAF                             GHC.IO.StdHandles        <entire-module>                 247           0    0.0    0.0     0.0    0.0
+ CAF                             GHC.IO.Encoding          <entire-module>                 245           0    0.0    0.0     0.0    0.0
+ CAF                             PriorityQueue            <entire-module>                 239           0    0.0    0.0     0.0    0.0
+  emptyPQ                        PriorityQueue            PriorityQueue.hs:8:1-15         392           1    0.0    0.0     0.0    0.0
+ CAF                             Debug.Trace              <entire-module>                 212           0    0.0    0.0     0.0    0.0
+ CAF                             Main                     <entire-module>                 197           0    0.0    0.0    99.1  100.0
+  main                           Main                     puzzle.hs:(114,1)-(115,82)      380           1    0.0    0.0    99.1  100.0
+   fromList                      Main                     puzzle.hs:(61,1)-(63,42)        396           1    0.0    0.0     0.0    0.0
+    fromList.hole                Main                     puzzle.hs:63:11-42              420           1    0.0    0.0     0.0    0.0
+    fromList.tiles               Main                     puzzle.hs:62:11-37              398           1    0.0    0.0     0.0    0.0
+    manualHash                   Main                     puzzle.hs:42:1-69               397           1    0.0    0.0     0.0    0.0
+     manualHash.\                Main                     puzzle.hs:42:42-53              399          16    0.0    0.0     0.0    0.0
+    manualHeuristic              Main                     puzzle.hs:46:1-71               402           1    0.0    0.0     0.0    0.0
+     tileDistance                Main                     puzzle.hs:(49,1)-(51,32)        403          16    0.0    0.0     0.0    0.0
+      tileDistance.(...)         Main                     puzzle.hs:50:11-48              408          15    0.0    0.0     0.0    0.0
+       indToCoords               Main                     puzzle.hs:38:1-38               409          15    0.0    0.0     0.0    0.0
+      tileDistance.(...)         Main                     puzzle.hs:51:11-32              405          15    0.0    0.0     0.0    0.0
+       indToCoords               Main                     puzzle.hs:38:1-38               406          15    0.0    0.0     0.0    0.0
+      tileDistance.solvedX       Main                     puzzle.hs:50:11-48              407          15    0.0    0.0     0.0    0.0
+      tileDistance.solvedY       Main                     puzzle.hs:50:11-48              411          15    0.0    0.0     0.0    0.0
+      tileDistance.x             Main                     puzzle.hs:51:11-32              404          15    0.0    0.0     0.0    0.0
+      tileDistance.y             Main                     puzzle.hs:51:11-32              410          15    0.0    0.0     0.0    0.0
+   solveInParts                  Main                     puzzle.hs:(96,1)-(98,39)        382           1    0.0    0.0    99.1  100.0
+    moveChar                     Main                     puzzle.hs:(25,1)-(28,20)        455          67    0.0    0.0     0.0    0.0
+    solveOnePart                 Main                     puzzle.hs:(107,1)-(110,67)      383           3    0.0    0.0    99.1  100.0
+     aStar                       AStar                    AStar.hs:(17,1)-(18,67)         384           3    0.0    0.0    99.1  100.0
+      repeatUntilSuccess         AStar                    AStar.hs:(54,1)-(58,39)         385      184555    1.8    1.2    99.1  100.0
+       aStarStep                 AStar                    AStar.hs:(25,1)-(50,38)         387           0   13.4   10.5    97.3   98.8
+        aStarStep.\              AStar                    AStar.hs:(45,75)-(49,48)        427      346642    0.9    6.5     9.8   15.4
+         aStarStep.\.newDist     AStar                    AStar.hs:46:33-52               432      346642    0.0    0.2     0.0    0.2
+         aStarStep.\.nextPQ      AStar                    AStar.hs:48:33-118              428      346642    0.9    2.2     8.9    8.6
+          insert                 PriorityQueue            PriorityQueue.hs:19:1-46        429      346642    0.9    0.9     8.0    5.5
+           +++                   PriorityQueue            PriorityQueue.hs:(12,1)-(16,96) 430     1387898    7.1    4.5     7.1    4.5
+          solveOnePart.\         Main                     puzzle.hs:109:78-103            433      346642    0.0    1.0     0.0    1.0
+           heuristic             Main                     puzzle.hs:58:1-30               434      346642    0.0    0.0     0.0    0.0
+        extractMin               PriorityQueue            PriorityQueue.hs:(22,1)-(23,55) 388      184555    0.0    0.5     4.5    3.7
+         +++                     PriorityQueue            PriorityQueue.hs:(12,1)-(16,96) 431      937148    4.5    3.2     4.5    3.2
+        getHM                    HashMap                  HashMap.hs:(33,1)-(35,37)       393      184555    4.5    2.3     8.9    5.9
+         hash                    Main                     puzzle.hs:55:5-29               395      184555    0.0    0.0     0.0    0.0
+         ==                      Main                     puzzle.hs:10:59-60              454       69626    4.5    3.6     4.5    3.6
+        solveOnePart.\           Main                     puzzle.hs:109:41-59             400      114929    0.0    0.1     0.0    0.1
+         heuristic               Main                     puzzle.hs:58:1-30               401      114929    0.0    0.0     0.0    0.0
+        getMoves                 Main                     puzzle.hs:69:1-71               412      114926    0.0    1.3    58.0   57.6
+         getMove                 Main                     puzzle.hs:(72,1)-(84,40)        413      459704    4.5   11.6    58.0   56.3
+          getMove.(...)          Main                     puzzle.hs:83:11-36              422      459704    0.0    0.0     0.0    0.8
+           moveCoords            Main                     puzzle.hs:(19,1)-(22,26)        423      459704    0.0    0.8     0.0    0.8
+          getMove.(...)          Main                     puzzle.hs:84:11-40              418      459704    0.0    1.4     2.7    1.9
+           indToCoords           Main                     puzzle.hs:38:1-38               419      459704    2.7    0.5     2.7    0.5
+          getMove.(...)          Main                     puzzle.hs:82:11-39              416      459704    0.9    0.6     0.9    0.6
+          getMove.dx             Main                     puzzle.hs:83:11-36              421      459704    0.0    0.0     0.0    0.0
+          getMove.hx             Main                     puzzle.hs:84:11-40              417      459704    0.0    0.0     0.0    0.0
+          getMove.mx             Main                     puzzle.hs:82:11-39              415      459704    0.0    0.0     0.0    0.0
+          inBounds               Main                     puzzle.hs:31:1-54               414      459704    2.7    2.7     2.7    2.7
+          getMove.dy             Main                     puzzle.hs:83:11-36              426      403206    0.0    0.0     0.0    0.0
+          getMove.hy             Main                     puzzle.hs:84:11-40              425      403206    0.0    0.0     0.0    0.0
+          getMove.my             Main                     puzzle.hs:82:11-39              424      403206    0.0    0.0     0.0    0.0
+          getMove.movedInd       Main                     puzzle.hs:81:11-41              439      346642    0.9    0.0     1.8    0.8
+           coordsToInd           Main                     puzzle.hs:35:1-30               440      346642    0.9    0.8     0.9    0.8
+          getMove.movedTile      Main                     puzzle.hs:80:11-38              438      346642    0.9    0.6     0.9    0.6
+          getMove.newHeur        Main                     puzzle.hs:78:11-91              436      346642    3.6    1.9    24.1   18.1
+           tileDistance          Main                     puzzle.hs:(49,1)-(51,32)        437      693284    9.8    9.3    20.5   16.2
+            tileDistance.(...)   Main                     puzzle.hs:50:11-48              445      693284    2.7    3.2     4.5    4.0
+             indToCoords         Main                     puzzle.hs:38:1-38               446      693284    1.8    0.8     1.8    0.8
+            tileDistance.(...)   Main                     puzzle.hs:51:11-32              442      693284    0.9    2.1     4.5    2.9
+             indToCoords         Main                     puzzle.hs:38:1-38               443      693284    3.6    0.8     3.6    0.8
+            tileDistance.solvedX Main                     puzzle.hs:50:11-48              444      693284    0.0    0.0     0.0    0.0
+            tileDistance.solvedY Main                     puzzle.hs:50:11-48              448      693284    0.9    0.0     0.9    0.0
+            tileDistance.x       Main                     puzzle.hs:51:11-32              441      693284    0.0    0.0     0.0    0.0
+            tileDistance.y       Main                     puzzle.hs:51:11-32              447      693284    0.9    0.0     0.9    0.0
+          getMove.newPuzzle      Main                     puzzle.hs:73:11-62              435      346642    0.0    0.0     0.0    0.0
+          getMove.newHash        Main                     puzzle.hs:77:11-69              450      184552   19.6   16.6    19.6   16.6
+          getMove.newTiles       Main                     puzzle.hs:74:11-67              453      184551    0.9    2.7     0.9    2.7
+        putHM                    HashMap                  HashMap.hs:21:1-76              449      114926    2.7    5.2     2.7    5.5
+         hash                    Main                     puzzle.hs:55:5-29               451      114926    0.0    0.0     0.0    0.0
+         updateNode              HashMap                  HashMap.hs:(24,1)-(25,144)      452      114926    0.0    0.3     0.0    0.3
+      aStar.startPQ              AStar                    AStar.hs:18:11-67               389           3    0.0    0.0     0.0    0.0
+       insert                    PriorityQueue            PriorityQueue.hs:19:1-46        390           3    0.0    0.0     0.0    0.0
+        +++                      PriorityQueue            PriorityQueue.hs:(12,1)-(16,96) 391           3    0.0    0.0     0.0    0.0
+      aStarStep                  AStar                    AStar.hs:(25,1)-(50,38)         386           3    0.0    0.0     0.0    0.0
+      emptyHM                    HashMap                  HashMap.hs:18:1-30              394           3    0.0    0.0     0.0    0.0
+ main                            Main                     puzzle.hs:(114,1)-(115,82)      381           0    0.9    0.0     0.9    0.0
